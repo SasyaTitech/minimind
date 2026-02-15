@@ -1,4 +1,12 @@
-model/__pycache__
+__pycache__/
+*.py[cod]
+*$py.class
 out
 website/
 docs-minimind/
+dataset/*.jsonl
+dataset/*.json
+dataset/*.parquet
+dataset/*.arrow
+dataset/*.bin
+MiniMind*/
