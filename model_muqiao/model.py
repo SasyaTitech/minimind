@@ -1,4 +1,6 @@
 from transformers import PretrainedConfig
+import torch
+import torch.nn as nn
 
 # PretrainedConfig是Hugging Face的模型配置基类，训练发布的时候会生成config.json
 # 别人from_pretrained就会先读配置然后构建模型
@@ -71,4 +73,25 @@ class MokioMindConfig(PretrainedConfig):
             else None
         )
 
- 
+
+
+# 1. RMSNorm
+class RMSNorm(nn.Module):
+    def __init__(self, dim:int, eps:float = 1e-5):
+        super().__init__() 
+        self.dim = dim
+        self.eps = eps
+        self.weight = nn.Parameter(torch.ones(dim)) #需要被学习的的得用这个包裹
+
+    def _norm(self, x:torch.Tensor): #首字母大写通常表示类/类型（class/type），小写通常是函数，变量
+        return torch.rsqrt(x.float().pow(2).mean(-1, keepdim=True) + self.eps) * x #求平均会导致维度退化
+        # 计算的时候把x升到f32计算比较稳
+    def forward(self, x:torch.Tensor):
+        return self._norm(x) * self.weight.type_as(x) #本身是float32的weight可能会改掉整体的类型
+        #比如这里如果x是float16或者bfloat16可能会被强行拉到float32
+    
+
+# 2. RoPE 相对位置编码
+
+
+
